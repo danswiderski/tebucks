@@ -31,7 +31,7 @@ namespace TEbucksServer.Controllers
                 return StatusCode(500);
             }
         }
-        [HttpGet]
+        [HttpGet ("transfers")]
         public ActionResult<List<Transfer>> GetAccountTrans()
         {
             try
