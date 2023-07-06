@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using TEbucksServer.DAO;
 using TEbucksServer.Models;
-using TEBucksServer.Models;
 
 namespace TEbucksServer.Controllers
 {
@@ -37,8 +36,8 @@ namespace TEbucksServer.Controllers
             try
             {
                 //TODO Dan this should work once you create Transfer
-                Account output = accountDao.GetAccountTransfer(User.Identity.Name);
-                if (output.user_Id > 0)
+                List<Transfer> output = accountDao.GetAccountTransfer(User.Identity.Name);
+                if (output.Count > 0)
                 {
                     return Ok(output);
                 }

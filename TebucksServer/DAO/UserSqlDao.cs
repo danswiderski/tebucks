@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using TEBucksServer.Models;
 using TEBucksServer.Security;
 using TEBucksServer.Security.Models;
+using static System.Collections.Specialized.BitVector32;
 
 namespace TEBucksServer.DAO
 {
@@ -44,6 +45,36 @@ namespace TEBucksServer.DAO
 
             return returnUser;
         }
+
+        public User GetUserById(int id)
+        {
+            User user = null;
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+                    string sql = "SELECT user_id, firstname, lastname, username, password_hash, salt FROM tebucks_user WHERE user_id = @user_id";
+
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("@user_id", id);
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        user = GetUserFromReader(reader);
+                    }
+                }
+            }
+            catch (SqlException)
+            {
+                throw;
+            }
+
+            return user;
+        }
+
 
         public List<User> GetUsers()
         {
