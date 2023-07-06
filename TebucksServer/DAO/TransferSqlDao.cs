@@ -3,6 +3,7 @@ using System.Data.SqlClient;
 using TEbucksServer.Models;
 using TEbucksServer.DAO;
 using System.Collections.Generic;
+using System.Security.Cryptography.Xml;
 
 namespace TEbucksServer.DAO
 {
@@ -36,7 +37,7 @@ namespace TEbucksServer.DAO
             catch { }
             return output;
         }
-        public Transfer CreateNewTransfer(NewTransfer transfer, TransferStatus transStatus)
+        public Transfer CreateNewTransfer(NewTransfer transfer)
         {
 
 
@@ -54,7 +55,7 @@ namespace TEbucksServer.DAO
                     cmd.Parameters.AddWithValue("@to_user_id", transfer.UserTo);
                     cmd.Parameters.AddWithValue("from_user_id", transfer.UserFrom);
                     cmd.Parameters.AddWithValue("@transfer_type", transfer.TransferType);
-                    cmd.Parameters.AddWithValue("@transfer_status", transStatus.TransferStatusUpdate);
+                    cmd.Parameters.AddWithValue("@transfer_status", StatusHelper(transfer));
                     cmd.Parameters.AddWithValue("@amount", transfer.Amount);
 
                     newTransID = Convert.ToInt32(cmd.ExecuteScalar());
@@ -127,6 +128,20 @@ namespace TEbucksServer.DAO
             return updatedTrans;
         }
 
+        public string StatusHelper(NewTransfer newTransfer)
+        {
+            string transStatus = "";
+
+            if (newTransfer.TransferType == "Send")
+            {
+                transStatus = "Approved";
+            }
+            if (newTransfer.TransferType == "Request")
+            {
+                transStatus = "Pending";
+            }
+            return transStatus;
+        }
 
 
 
