@@ -1,4 +1,5 @@
-﻿using TEbucksServer.Models;
+﻿using System.Collections.Generic;
+using TEbucksServer.Models;
 
 namespace TEbucksServer.DAO
 {
@@ -6,11 +7,11 @@ namespace TEbucksServer.DAO
     {
         Transfer GetTransferByID(int id);
 
-        NewTransfer CreateNewTransfer(NewTransfer transfer);
+        Transfer CreateNewTransfer(NewTransfer transfer, TransferStatus transStatus);
 
-        TransferStatus UpdateTransferStatus(string pending, string approved, string rejected);
+ //       TransferStatus UpdateTransferStatus(string pending, string approved, string rejected);
 
-
+        List<Transfer> GetAccountTransfer(string username);
 
 
     }

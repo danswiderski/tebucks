@@ -12,6 +12,7 @@ namespace TEbucksServer.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAccountDAO accountDao;
+        private readonly ITransferDao transferDao;
 
         [HttpGet]
         public ActionResult<Account> GetAccountByName()
@@ -36,12 +37,12 @@ namespace TEbucksServer.Controllers
             try
             {
                 //TODO Dan this should work once you create Transfer
-                List<Transfer> output = accountDao.GetAccountTransfer(User.Identity.Name);
+                List<Transfer> output = transferDao.GetAccountTransfer(User.Identity.Name);
                 if (output.Count > 0)
                 {
                     return Ok(output);
                 }
-                return NotFound(new { messgae = "User Not found!" });
+                return NotFound(new { message = "User Not found!" });
             }
             catch (System.Exception)
             {

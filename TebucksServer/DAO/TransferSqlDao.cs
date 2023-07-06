@@ -2,17 +2,18 @@
 using System.Data.SqlClient;
 using TEbucksServer.Models;
 using TEbucksServer.DAO;
+using System.Collections.Generic;
 
 namespace TEbucksServer.DAO
 {
-    public class TransferSqlDao 
+    public class TransferSqlDao :ITransferDao
     {
         private readonly string connectionString;
         public TransferSqlDao(string dbconnectionstring)
         {
             connectionString = dbconnectionstring;
         }
-        public Transfer GetTransferById(int id)
+        public Transfer GetTransferByID(int id)
         {
             Transfer output = null;
             string sql = "select * from transfer where transder_id = @id";
@@ -58,7 +59,7 @@ namespace TEbucksServer.DAO
 
                     newTransID = Convert.ToInt32(cmd.ExecuteScalar());
                 }
-                newTrans = GetTransferById(newTransID);
+                newTrans = GetTransferByID(newTransID);
             }
             catch (SqlException)
             {
@@ -66,14 +67,46 @@ namespace TEbucksServer.DAO
             }
             return newTrans;
             }
+        public List<Transfer> GetAccountTransfer(string username)
+        {
+            List<Transfer> transfers = new List<Transfer>();
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand("SELECT tranferId, to_user_Id, account.user_Id, balance  " +
+                        "FROM transfer WHERE to_user_id(select top 1 user_id from user where username = @accountname) or " +
+                        "from_user_id(select top 1 user_id from user where username = @accountname)", conn);
+                    cmd.Parameters.AddWithValue("@accountname", username);
+                    SqlDataReader reader = cmd.ExecuteReader();
 
-            public Transfer MapRowToTransfer(SqlDataReader reader)
+                    while (reader.Read())
+                    {
+                        transfers.Add(MapRowToTransfer(reader));
+                        return transfers;
+                    }
+
+                }
+
+            }
+            catch
+            {
+                throw new NotImplementedException();
+            }
+            return transfers;
+        }
+
+        public Transfer MapRowToTransfer(SqlDataReader reader)
             {
                 Transfer transfer = new Transfer();
+                {
                 transfer.TransferID = Convert.ToInt32(reader["transfer_id"]);
                 transfer.TransferType = Convert.ToInt32(reader["transfer_type"]);
                 transfer.TransferStatus = Convert.ToInt32(reader["transfer_status"]);
+                }
                 return transfer;
+            
             }
 
     }

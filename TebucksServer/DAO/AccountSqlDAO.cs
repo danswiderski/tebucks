@@ -70,36 +70,8 @@ namespace TEbucksServer.DAO
 
             return fetchedAccount;
         }
-        public List<Transfer> GetAccountTransfer(string username)
-        {
-            List<Transfer> transfers = new List<Transfer>();
-            try
-            {
-                using (SqlConnection conn = new SqlConnection(connectionString))
-                {
-                    conn.Open();
-                    SqlCommand cmd = new SqlCommand("SELECT tranferId, to_user_Id, account.user_Id, balance  " +
-                        "FROM transfer WHERE to_user_id(select top 1 user_id from user where username = @accountname) or " +
-                        "from_user_id(select top 1 user_id from user where username = @accountname)", conn);
-                    cmd.Parameters.AddWithValue("@accountname", username);
-                    SqlDataReader reader = cmd.ExecuteReader();
-
-                    while (reader.Read())
-                    {
-                        transfers = MapRowToTransfer(reader);
-                        return transfers;
-                    }
-
-                }
-                //TODO make sure Dan has Transfer
-            }
-            catch
-            {            
-                throw new NotImplementedException();
-            }
-            return transfers;
-        }
-        //TODO Dan please create a MapRowToTransfer :)
+        
+        
         private Account MapRowToAccount(SqlDataReader reader)
         {
             Account account = new Account();
@@ -109,6 +81,7 @@ namespace TEbucksServer.DAO
 
             return account;
         }
+
 
     }
 
