@@ -1,9 +1,12 @@
-﻿namespace TEBucksServer.Models
+﻿using System.Text.Json.Serialization;
+
+namespace TEBucksServer.Models
 {
     public class User
     {
         public string Firstname { get; set; }
         public string Lastname { get; set; }
+        [JsonPropertyName("id")]
         public int UserId { get; set; }
         public string Username { get; set; }
         public string PasswordHash { get; set; }

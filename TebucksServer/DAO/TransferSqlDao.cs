@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace TEbucksServer.DAO
 {
-    public class TransferSqlDao :ITransferDao
+    public class TransferSqlDao : ITransferDao
     {
         private readonly string connectionString;
         public TransferSqlDao(string dbconnectionstring)
@@ -66,7 +66,7 @@ namespace TEbucksServer.DAO
                 throw new Exception();
             }
             return newTrans;
-            }
+        }
         public List<Transfer> GetAccountTransfer(string username)
         {
             List<Transfer> transfers = new List<Transfer>();
@@ -96,18 +96,55 @@ namespace TEbucksServer.DAO
             }
             return transfers;
         }
+        public Transfer UpdateTransferStatus(int id, string newStatus)
+        {
+            Transfer updatedTrans = null;
+
+            string sql = "UPDATE transfer SET transfer_status = @transfer_status WHERE transfer_id = @transfer_id;";
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("@transfer_status", newStatus);
+                    cmd.Parameters.AddWithValue("@transfer_id", id);
+                    int numberOfRows = cmd.ExecuteNonQuery();
+                    if (numberOfRows == 0)
+                    {
+                        throw new Exception("Zero rows affected, expected at least one");
+                    }
+                }
+                updatedTrans = GetTransferByID(id);
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception($"SQL exception occurred", ex);
+            }
+
+            return updatedTrans;
+        }
+
+
+
+
+
+
 
         public Transfer MapRowToTransfer(SqlDataReader reader)
+        {
+            Transfer transfer = new Transfer();
             {
-                Transfer transfer = new Transfer();
-                {
                 transfer.TransferID = Convert.ToInt32(reader["transfer_id"]);
                 transfer.TransferType = Convert.ToInt32(reader["transfer_type"]);
                 transfer.TransferStatus = Convert.ToInt32(reader["transfer_status"]);
-                }
-                return transfer;
-            
             }
+            return transfer;
+        }
+
 
     }
+    
 }

@@ -9,7 +9,7 @@ namespace TEbucksServer.DAO
 
         Transfer CreateNewTransfer(NewTransfer transfer, TransferStatus transStatus);
 
- //       TransferStatus UpdateTransferStatus(string pending, string approved, string rejected);
+        Transfer UpdateTransferStatus(int id, string newStatus);
 
         List<Transfer> GetAccountTransfer(string username);
 
