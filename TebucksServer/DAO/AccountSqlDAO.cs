@@ -60,6 +60,7 @@ namespace TEbucksServer.DAO
                     {
                         fetchedAccount = MapRowToAccount(reader);
                         return fetchedAccount;
+                    }
                 }
             }
             catch (Exception)
