@@ -7,7 +7,7 @@ namespace TEbucksServer.DAO
     {
         Transfer GetTransferByID(int id);
 
-        Transfer CreateNewTransfer(NewTransfer transfer, TransferStatus transStatus);
+        Transfer CreateNewTransfer(NewTransfer transfer);
 
         Transfer UpdateTransferStatus(int id, string newStatus);
 
