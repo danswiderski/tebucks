@@ -1,4 +1,5 @@
-﻿using TEBucksServer.Models;
+﻿using System.Reflection.Metadata;
+using TEBucksServer.Models;
 
 namespace TEbucksServer.Models
 {
@@ -6,7 +7,7 @@ namespace TEbucksServer.Models
     {
         public int TransferID { get; set; }
 
-        public int TransferType { get; set; }
+        public string TransferType { get; set; }
 
         public int TransferStatus { get; set; }
 

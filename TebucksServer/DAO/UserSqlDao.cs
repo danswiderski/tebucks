@@ -76,7 +76,7 @@ namespace TEBucksServer.DAO
         }
 
 
-        public List<User> GetUsers()
+        public List<User> GetUsers(string username = "")
         {
             List<User> returnUsers = new List<User>();
 
@@ -92,6 +92,7 @@ namespace TEBucksServer.DAO
                     while (reader.Read())
                     {
                         User u = GetUserFromReader(reader);
+                        if (u.Username != username)
                         returnUsers.Add(u);
                     }
                 }
