@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -11,6 +12,7 @@ namespace TEbucksServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class AccountController : ControllerBase
     {
         private readonly IAccountDAO accountDao;
@@ -33,7 +35,7 @@ namespace TEbucksServer.Controllers
                 }
                 return NotFound(new { message = "User Not found!" });
             }
-            catch (System.Exception)
+            catch (System.Exception e)
             {
                 return StatusCode(500);
             }

@@ -58,6 +58,7 @@ namespace TEBucksServer
             services.AddSingleton<IPasswordHasher>(sp => new PasswordHasher());
             services.AddTransient<IUserDao>(sp => new UserSqlDao(connectionString));
             services.AddTransient<IAccountDAO>(sp => new AccountSqlDAO(connectionString));
+            services.AddTransient<ITransferDao>(sp => new TransferSqlDao(connectionString));
 
             services.AddSwaggerGen(s => {
                 s.SwaggerDoc("v1", new OpenApiInfo
