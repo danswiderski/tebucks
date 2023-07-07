@@ -14,24 +14,28 @@ namespace TEbucksServer.DAO
         {
             connectionString = dbconnectionstring;
         }
-        public Account GetAccount(int accountId)
+        public Account GetAccount(int userID)
         {
             Account fetchedAccount = new Account();
-
+            string sql = "SELECT username, accountId, account.user_Id, balance  FROM account join tebucks_user as u on u.user_id = account.user_id WHERE u.user_id = @userId;";
             try
             {
                 
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
-                    SqlCommand cmd = new SqlCommand("SELECT username, accountId, account.user_Id, balance  FROM account join tebucks_user as u on u.user_id = account.user_id WHERE accountId = @accountId", conn);
-                    cmd.Parameters.AddWithValue("@accountId", accountId);
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("@userId", userID);
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     if (reader.Read())
                     {
+                        fetchedAccount = MapRowToAccount(reader);
                         return fetchedAccount;
                     }
+                    
+                       
+                    
                 }
             }
             catch (Exception)
@@ -56,7 +60,7 @@ namespace TEbucksServer.DAO
                     cmd.Parameters.AddWithValue("@user_id", user_id);
                     newAccID = Convert.ToInt32(cmd.ExecuteScalar());
                 }
-                newAccount = GetAccount(newAccID);
+                newAccount = GetAccount(user_id);
             }
             catch (Exception)
             {
