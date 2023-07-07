@@ -8,6 +8,6 @@ namespace TEbucksServer.DAO
         Account GetAccount(int accountId);
 
         Account GetAccountByUserName(string username);
-//        List<Transfer> GetAccountTransfer(string username);
+        Account CreateAccount(int user_id);
     }
 }

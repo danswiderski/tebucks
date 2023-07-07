@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TEbucksServer.DAO;
+using TEbucksServer.Models;
 using TEBucksServer.DAO;
 using TEBucksServer.Models;
 using TEBucksServer.Security;
@@ -12,12 +14,14 @@ namespace TEBucksServer.Controllers
         private readonly ITokenGenerator tokenGenerator;
         private readonly IPasswordHasher passwordHasher;
         private readonly IUserDao userDao;
+        private readonly IAccountDAO accountDao;
 
-        public LoginController(ITokenGenerator _tokenGenerator, IPasswordHasher _passwordHasher, IUserDao _userDao)
+        public LoginController(ITokenGenerator _tokenGenerator, IPasswordHasher _passwordHasher, IUserDao _userDao, IAccountDAO _accountDao)
         {
             tokenGenerator = _tokenGenerator;
             passwordHasher = _passwordHasher;
             userDao = _userDao;
+            accountDao = _accountDao;
         }
 
         [HttpPost]
@@ -59,13 +63,21 @@ namespace TEBucksServer.Controllers
             User user = userDao.AddUser(userParam);
             if (user != null)
             {
+            Account account = accountDao.CreateAccount(user.UserId);
                 result = Created(user.Username, null); //values aren't read on client
             }
             else
             {
                 result = BadRequest(new { message = "An error occurred and user was not created." });
             }
-
+            if(user != null)
+            {
+                result = Created(user.Username, null);
+            }
+            else
+            {
+                result = BadRequest(new { message = "An error occurred and user was not created." });
+            }
             return result;
         }
     }
