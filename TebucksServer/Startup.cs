@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using TEbucksServer.DAO;
 using TEBucksServer.DAO;
 using TEBucksServer.Security;
 
@@ -56,6 +57,7 @@ namespace TEBucksServer
             services.AddSingleton<ITokenGenerator>(sp => new JwtGenerator(Configuration["JwtSecret"]));
             services.AddSingleton<IPasswordHasher>(sp => new PasswordHasher());
             services.AddTransient<IUserDao>(sp => new UserSqlDao(connectionString));
+            services.AddTransient<IAccountDAO>(sp => new AccountSqlDAO(connectionString));
 
             services.AddSwaggerGen(s => {
                 s.SwaggerDoc("v1", new OpenApiInfo

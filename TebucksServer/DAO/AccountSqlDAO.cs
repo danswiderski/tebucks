@@ -42,6 +42,30 @@ namespace TEbucksServer.DAO
 
             return fetchedAccount;
         }
+        public Account CreateAccount(int user_id)
+        {
+            Account newAccount = new Account();
+            string sql = "insert into account (user_id, balance) output inserted.accountId values (@user_id, 1000);";
+            try
+            {
+                int newAccID;
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("@user_id", user_id);
+                    newAccID = Convert.ToInt32(cmd.ExecuteScalar());
+                }
+                newAccount = GetAccount(newAccID);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            return newAccount;
+        }
+
         public Account GetAccountByUserName(string username)
         {
             Account fetchedAccount = new Account();

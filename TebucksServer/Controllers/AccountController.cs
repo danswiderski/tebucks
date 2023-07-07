@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using TEbucksServer.DAO;
 using TEbucksServer.Models;
+using TEBucksServer.DAO;
+using TEBucksServer.Security;
 
 namespace TEbucksServer.Controllers
 {
@@ -14,7 +16,12 @@ namespace TEbucksServer.Controllers
         private readonly IAccountDAO accountDao;
         private readonly ITransferDao transferDao;
 
-        [HttpGet]
+        public AccountController(ITransferDao _transferDao, IAccountDAO _accountDao)
+        {
+            transferDao = _transferDao;
+            accountDao = _accountDao;
+        }
+        [HttpGet("balance")]
         public ActionResult<Account> GetAccountByName()
         {
             try
