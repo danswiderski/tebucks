@@ -12,6 +12,13 @@ namespace TEbucksServer.Controllers
         private readonly IAccountDAO accountDao;
         private readonly ITransferDao transferDao;
 
+        public TransfersController(ITransferDao _transferDao, IAccountDAO _accountDao)
+        {
+            transferDao = _transferDao;
+            accountDao = _accountDao;
+        }
+
+
         [HttpGet("{id}")]
         public ActionResult<Transfer> Get(int id)
         {

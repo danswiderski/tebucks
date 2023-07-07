@@ -62,7 +62,7 @@ namespace TEbucksServer.DAO
                 }
                 newTrans = GetTransferByID(newTransID);
             }
-            catch (SqlException)
+            catch (SqlException e)
             {
                 throw new Exception();
             }
@@ -153,7 +153,7 @@ namespace TEbucksServer.DAO
             Transfer transfer = new Transfer();
             {
                 transfer.TransferID = Convert.ToInt32(reader["transfer_id"]);
-                transfer.TransferType = Convert.ToInt32(reader["transfer_type"]);
+                transfer.TransferType = Convert.ToString(reader["transfer_type"]);
                 transfer.TransferStatus = Convert.ToInt32(reader["transfer_status"]);
             }
             return transfer;

@@ -9,6 +9,6 @@ namespace TEBucksServer.DAO
 
         User GetUserById(int id);
         User AddUser(RegisterUser registerUser);
-        List<User> GetUsers();
+        List<User> GetUsers(string usermame = "");
     }
 }
