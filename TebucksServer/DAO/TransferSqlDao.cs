@@ -41,9 +41,9 @@ namespace TEbucksServer.DAO
         {
 
 
-            Transfer newTrans = null;
+            Transfer newTrans = new Transfer();
 
-            string sql = "INSERT INTO transfer (to_user_id, from_user_id , transfer_type, transfer_status, amount )" + "OUTPUT INSERTED.transfer_id VALUES (@to_user_id, @from_user_id , @transfer_type, @transfer_status, @amount);";
+            string sql = "INSERT INTO transfer (to_user_id, from_user_id , transfer_type, transfer_status, amount )" + "OUTPUT INSERTED.transfer_id VALUES (@to_user_id, @from_user_id , (select type_id from transfer_type where transfer_name = @transfer_type), @transfer_status, @amount);";
             try
             {
                 int newTransID;
@@ -53,7 +53,7 @@ namespace TEbucksServer.DAO
 
                     SqlCommand cmd = new SqlCommand(sql, conn);
                     cmd.Parameters.AddWithValue("@to_user_id", transfer.UserTo);
-                    cmd.Parameters.AddWithValue("from_user_id", transfer.UserFrom);
+                    cmd.Parameters.AddWithValue("@from_user_id", transfer.UserFrom);
                     cmd.Parameters.AddWithValue("@transfer_type", transfer.TransferType);
                     cmd.Parameters.AddWithValue("@transfer_status", StatusHelper(transfer));
                     cmd.Parameters.AddWithValue("@amount", transfer.Amount);

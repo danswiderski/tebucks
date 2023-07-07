@@ -32,6 +32,7 @@ namespace TEBucksServer.Controllers
 
             // Get the user by username
             User user = userDao.GetUser(userParam.Username);
+            
 
             // If we found a user and the password hash matches
             if (user != null && passwordHasher.VerifyHashMatch(user.PasswordHash, userParam.Password, user.Salt))
@@ -39,14 +40,18 @@ namespace TEBucksServer.Controllers
                 // Create an authentication token
                 string token = tokenGenerator.GenerateToken(user.UserId, user.Username/*, user.Role*/);
 
+                Account account = accountDao.GetAccount(user.UserId);
+
+                ReturnAccount retAcc = new ReturnAccount() {Balance = account.balance, user_id = user.UserId};
                 // Create a ReturnUser object to return to the client
-                ReturnUser retUser = new ReturnUser() { user = user, Token = token };
+                ReturnUser retUser = new ReturnUser() { user = user, Token = token};
 
                 // Switch to 200 OK
                 result = Ok(retUser);
+                //result2 = Ok(retAcc);
             }
 
-            return result;
+            return result; // + result2
         }
 
         [HttpPost("/register")]
