@@ -74,7 +74,30 @@ namespace TEBucksServer.DAO
 
             return user;
         }
+        public User GetUserByAccountId(int accountId)
+        {
+            string sql = "select * from tebucks_user where user_id = (select top 1 user_id from account where accountId = @id)";
+            try
+            {
+                using(SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("@id", accountId);
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        return GetUserFromReader(reader);
+                    }
+                }
+            }
+            catch (Exception)
+            {
 
+                throw;
+            }
+            return null;
+        }
 
         public List<User> GetUsers(string username = "")
         {

@@ -4,6 +4,7 @@ using TEbucksServer.Models;
 using TEbucksServer.DAO;
 using System.Collections.Generic;
 using System.Security.Cryptography.Xml;
+using TEBucksServer.DAO;
 
 namespace TEbucksServer.DAO
 {
@@ -17,7 +18,7 @@ namespace TEbucksServer.DAO
         public Transfer GetTransferByID(int id)
         {
             Transfer output = null;
-            string sql = "select * from transfer where transder_id = @id";
+            string sql = "select * from transfer join transfer_type on transfer.transfer_type = type_id where transfer_id = @id";
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
@@ -42,18 +43,27 @@ namespace TEbucksServer.DAO
 
 
             Transfer newTrans = new Transfer();
-
-            string sql = "INSERT INTO transfer (to_user_id, from_user_id , transfer_type, transfer_status, amount )" + "OUTPUT INSERTED.transfer_id VALUES (@to_user_id, @from_user_id , (select type_id from transfer_type where transfer_name = @transfer_type), @transfer_status, @amount);";
+            string toAccountSQL = "select accountId from account where user_id = @userTo";
+            string fromAccountSQL = "select accountId from account where user_id = @userFrom";
+            string sql = "INSERT INTO transfer (to_user_id, from_user_id , transfer_type, transfer_status, amount )" + "OUTPUT INSERTED.transfer_id VALUES (@to_user_id, @from_user_id , (select type_id from transfer_type where transfer_name = @transfer_type), (select status_id from status where status_name = @transfer_status), @amount);";
             try
             {
                 int newTransID;
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
+                    SqlCommand cmd = new SqlCommand(toAccountSQL, conn);
+                    cmd.Parameters.AddWithValue("@userTo", transfer.UserTo);
+                    int toAccountID = Convert.ToInt32(cmd.ExecuteScalar());
 
-                    SqlCommand cmd = new SqlCommand(sql, conn);
-                    cmd.Parameters.AddWithValue("@to_user_id", transfer.UserTo);
-                    cmd.Parameters.AddWithValue("@from_user_id", transfer.UserFrom);
+                    cmd = new SqlCommand(fromAccountSQL, conn);
+                    cmd.Parameters.AddWithValue("@userFrom", transfer.UserFrom);
+                    int fromAccountID = Convert.ToInt32(cmd.ExecuteScalar());
+
+
+                    cmd = new SqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("@to_user_id", toAccountID);
+                    cmd.Parameters.AddWithValue("@from_user_id", fromAccountID);
                     cmd.Parameters.AddWithValue("@transfer_type", transfer.TransferType);
                     cmd.Parameters.AddWithValue("@transfer_status", StatusHelper(transfer));
                     cmd.Parameters.AddWithValue("@amount", transfer.Amount);
@@ -71,27 +81,45 @@ namespace TEbucksServer.DAO
         public List<Transfer> GetAccountTransfer(string username)
         {
             List<Transfer> transfers = new List<Transfer>();
+            string nameSQL = "select type_id from transfer_type where transfer_name = @transferid";
+            //string fromAccountSQL = "select  from account where user_id = @userFrom";
+
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
+
+
                     conn.Open();
-                    SqlCommand cmd = new SqlCommand("SELECT tranferId, to_user_Id, account.user_Id, balance  " +
-                        "FROM transfer WHERE to_user_id(select top 1 user_id from user where username = @accountname) or " +
-                        "from_user_id(select top 1 user_id from user where username = @accountname)", conn);
+
+                    SqlCommand cmd = new SqlCommand(nameSQL, conn);
+                    cmd.Parameters.AddWithValue("@transferid", username);
+                    int nameID = Convert.ToInt32(cmd.ExecuteScalar());
+
+
+
+                    cmd = new SqlCommand("SELECT transfer_Id, to_user_Id, from_user_Id, amount, transfer_status, transfer_name FROM transfer" +
+                        " join transfer_type on transfer.transfer_type = type_id  WHERE to_user_id = " 
+                       , conn);
+
                     cmd.Parameters.AddWithValue("@accountname", username);
+
+
+
+
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     while (reader.Read())
                     {
+
                         transfers.Add(MapRowToTransfer(reader));
-                        return transfers;
                     }
+                    return transfers;
 
                 }
 
             }
-            catch
+            catch (Exception e)
             {
                 throw new NotImplementedException();
             }
@@ -142,7 +170,11 @@ namespace TEbucksServer.DAO
             }
             return transStatus;
         }
+        //TODO this needs to be a helper for all balance transfers
+        //public Transfer UpdateBalance()
+        //{
 
+        //}
 
 
 
@@ -150,16 +182,20 @@ namespace TEbucksServer.DAO
 
         public Transfer MapRowToTransfer(SqlDataReader reader)
         {
+            UserSqlDao userDao = new UserSqlDao(connectionString);
+            AccountSqlDAO accountDao = new AccountSqlDAO(connectionString);
             Transfer transfer = new Transfer();
-            {
-                transfer.TransferID = Convert.ToInt32(reader["transfer_id"]);
-                transfer.TransferType = Convert.ToString(reader["transfer_type"]);
-                transfer.TransferStatus = Convert.ToInt32(reader["transfer_status"]);
-            }
+            transfer.transferId = Convert.ToInt32(reader["transfer_id"]);
+            transfer.transferType = Convert.ToString(reader["transfer_name"]);
+            transfer.transferStatus = Convert.ToInt32(reader["transfer_status"]);
+            transfer.userFrom = userDao.GetUserByAccountId(Convert.ToInt32(reader["from_user_id"]));
+            transfer.userTo = userDao.GetUserByAccountId(Convert.ToInt32(reader["to_user_id"]));
+            transfer.amount = Convert.ToDecimal(reader["amount"]);
+
             return transfer;
         }
 
 
     }
-    
+
 }

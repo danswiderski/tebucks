@@ -5,17 +5,17 @@ namespace TEbucksServer.Models
 {
     public class Transfer
     {
-        public int TransferID { get; set; }
+        public int transferId { get; set; }
 
-        public string TransferType { get; set; }
+        public string transferType { get; set; }
 
-        public int TransferStatus { get; set; }
+        public int transferStatus { get; set; }
 
-        public User UserFrom { get; set; }
+        public User userFrom { get; set; }
 
-        public User UserTo { get; set; }
+        public User userTo { get; set; }
 
-        public decimal Amount { get; set; }
+        public decimal amount { get; set; }
 
     }
 

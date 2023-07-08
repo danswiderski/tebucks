@@ -45,7 +45,7 @@ namespace TEbucksServer.Controllers
         {
             try
             {
-                //TODO Dan this should work once you create Transfer
+
                 List<Transfer> output = transferDao.GetAccountTransfer(User.Identity.Name);
                 if (output.Count > 0)
                 {
