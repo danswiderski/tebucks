@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TEbucksServer.DAO;
 using TEbucksServer.Models;
@@ -36,7 +37,7 @@ namespace TEbucksServer.Controllers
         public ActionResult<Transfer> CreateTransfer(NewTransfer transfer)
         {
             Transfer added = transferDao.CreateNewTransfer(transfer);
-            return Created($"/auctions/{added.TransferID}", added);
+            return Created($"/auctions/{added.transferId}", added);
         }
         [HttpPut ("{id}/status")]
         public ActionResult<Transfer> UpdateTransfer(int id, string newStatus)
