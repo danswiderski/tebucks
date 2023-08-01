@@ -40,13 +40,14 @@ namespace TEbucksServer.Controllers
             return Created($"/auctions/{added.transferId}", added);
         }
         [HttpPut ("{id}/status")]
-        public ActionResult<Transfer> UpdateTransfer(int id, string newStatus)
+        public ActionResult<Transfer> UpdateTransfer(int id, TransferStatusUpdateDto transferStatusUpdate)
         {
             if (transferDao.GetTransferByID(id) == null)
             {
                 return NotFound();
             }
-            Transfer updatestatus = transferDao.UpdateTransferStatus(id, newStatus);
+
+            transferDao.UpdateTransferStatus(id, transferStatusUpdate);
             return Ok(transferDao.GetTransferByID(id));
         }
 

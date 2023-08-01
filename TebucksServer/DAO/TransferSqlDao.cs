@@ -17,8 +17,11 @@ namespace TEbucksServer.DAO
         }
         public Transfer GetTransferByID(int id)
         {
-            Transfer output = null;
-            string sql = "select * from transfer join transfer_type on transfer.transfer_type = type_id where transfer_id = @id";
+            Transfer output = new Transfer();
+            string sql = "select transfer_id, to_user_id, from_user_id, status_name, transfer_name, amount from transfer as t " +
+                "join status as s on s.status_id = t.transfer_status " +
+                "join transfer_type as tt on tt.type_id = t.transfer_type " +
+                "where transfer_id = @id";
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
@@ -40,8 +43,6 @@ namespace TEbucksServer.DAO
         }
         public Transfer CreateNewTransfer(NewTransfer transfer)
         {
-
-
             Transfer newTrans = new Transfer();
             string toAccountSQL = "select accountId from account where user_id = @userTo";
             string fromAccountSQL = "select accountId from account where user_id = @userFrom";
@@ -71,6 +72,9 @@ namespace TEbucksServer.DAO
                     newTransID = Convert.ToInt32(cmd.ExecuteScalar());
                 }
                 newTrans = GetTransferByID(newTransID);
+                AccountSqlDAO accountDao = new AccountSqlDAO(connectionString);
+                UpdateBalance(newTrans, accountDao.GetAccountByUserName(newTrans.userTo.Username), accountDao.GetAccountByUserName(newTrans.userFrom.Username));
+
             }
             catch (SqlException e)
             {
@@ -81,7 +85,11 @@ namespace TEbucksServer.DAO
         public List<Transfer> GetAccountTransfer(string username)
         {
             List<Transfer> transfers = new List<Transfer>();
-            string nameSQL = "select type_id from transfer_type where transfer_name = @transferid";
+            string nameSQL = "SELECT transfer_id, from_user_id, to_user_id, transfer_name, status_name, t.amount from transfer as t " +
+                "JOIN account as a on a.accountId = t.from_user_id JOIN tebucks_user as tu on tu.user_id = a.user_id " +
+                "JOIN account as a2 on a2.accountId = t.to_user_id JOIN tebucks_user as tu2 on tu2.user_id = a2.user_id " +
+                "JOIN status as s on s.status_id = t.transfer_status JOIN transfer_type as tt on t.transfer_type = tt.type_id " +
+                "where tu.username = @username or tu2.username = @username";
             //string fromAccountSQL = "select  from account where user_id = @userFrom";
 
             try
@@ -93,25 +101,12 @@ namespace TEbucksServer.DAO
                     conn.Open();
 
                     SqlCommand cmd = new SqlCommand(nameSQL, conn);
-                    cmd.Parameters.AddWithValue("@transferid", username);
-                    int nameID = Convert.ToInt32(cmd.ExecuteScalar());
-
-
-
-                    cmd = new SqlCommand("SELECT transfer_Id, to_user_Id, from_user_Id, amount, transfer_status, transfer_name FROM transfer" +
-                        " join transfer_type on transfer.transfer_type = type_id  WHERE to_user_id = " 
-                       , conn);
-
-                    cmd.Parameters.AddWithValue("@accountname", username);
-
-
-
+                    cmd.Parameters.AddWithValue("@username", username);
 
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     while (reader.Read())
                     {
-
                         transfers.Add(MapRowToTransfer(reader));
                     }
                     return transfers;
@@ -125,11 +120,13 @@ namespace TEbucksServer.DAO
             }
             return transfers;
         }
-        public Transfer UpdateTransferStatus(int id, string newStatus)
+        public Transfer UpdateTransferStatus(int id, TransferStatusUpdateDto newStatus)
         {
             Transfer updatedTrans = null;
 
-            string sql = "UPDATE transfer SET transfer_status = @transfer_status WHERE transfer_id = @transfer_id;";
+            string sql = "UPDATE transfer SET transfer_status = " +
+                "(SELECT TOP 1 status_id FROM status WHERE status_name = @transfer_status) " +
+                "WHERE transfer_id = @transfer_id;";
 
             try
             {
@@ -138,7 +135,7 @@ namespace TEbucksServer.DAO
                     conn.Open();
 
                     SqlCommand cmd = new SqlCommand(sql, conn);
-                    cmd.Parameters.AddWithValue("@transfer_status", newStatus);
+                    cmd.Parameters.AddWithValue("@transfer_status", newStatus.transferStatus);
                     cmd.Parameters.AddWithValue("@transfer_id", id);
                     int numberOfRows = cmd.ExecuteNonQuery();
                     if (numberOfRows == 0)
@@ -147,12 +144,14 @@ namespace TEbucksServer.DAO
                     }
                 }
                 updatedTrans = GetTransferByID(id);
+                AccountSqlDAO accountDao = new AccountSqlDAO(connectionString);
+                UpdateBalance(updatedTrans, accountDao.GetAccountByUserName(updatedTrans.userTo.Username), accountDao.GetAccountByUserName(updatedTrans.userFrom.Username));
+
             }
             catch (SqlException ex)
             {
                 throw new Exception($"SQL exception occurred", ex);
             }
-
             return updatedTrans;
         }
 
@@ -171,12 +170,91 @@ namespace TEbucksServer.DAO
             return transStatus;
         }
         //TODO this needs to be a helper for all balance transfers
-        //public Transfer UpdateBalance()
-        //{
+        public bool UpdateBalance(Transfer transfer, Account recipient, Account sender)
+        {
+            //transfer.userTo.userId
+            //transfer.userFrom.userId
+            //transfer.amount 
+            //transfer.transferStatus
+            //recipient.balance
+            //recipient.user_Id
+            //sender.balance
+            //sender.user_Id
 
-        //}
+
+            if (transfer.userFrom.UserId != recipient.user_Id)
+            {
+                if (transfer.amount > 0)
+                {
+                    if (transfer.amount <= sender.balance)
+                    {
+                        if (transfer.transferStatus == "Approved")
+                        {
+                            recipient.balance += transfer.amount;
+                            sender.balance -= transfer.amount;
+                            string sql = "Update account Set balance = @balance where accountId = @accountid;";
+                            try
+                            {
+                                using (SqlConnection conn = new SqlConnection(connectionString))
+                                {
+                                    conn.Open();
+
+                                    SqlCommand recipientcmd = new SqlCommand(sql, conn);
+                                    recipientcmd.Parameters.AddWithValue("@balance", recipient.balance);
+                                    recipientcmd.Parameters.AddWithValue("@accountid", recipient.accountId);
+                                    int numberOfRows = recipientcmd.ExecuteNonQuery();
+                                    if (numberOfRows != 1)
+                                    {
+                                        throw new Exception("Zero rows affected, expected at least one");
+                                    }
+                                    else
+                                    {
+
+                                        SqlCommand sendercmd = new SqlCommand(sql, conn);
+                                        sendercmd.Parameters.AddWithValue("@balance", sender.balance);
+                                        sendercmd.Parameters.AddWithValue("@accountid", sender.accountId);
+                                        numberOfRows = sendercmd.ExecuteNonQuery();
+                                        if (numberOfRows != 1)
+                                        {
+                                            throw new Exception("Zero rows affected, expected at least one");
+                                        }
+                                        else
+                                        {
+                                            return true;
+                                        }
+                                    }
+                                }
+                            }
+                            catch (SqlException ex)
+                            {
+                                throw new Exception($"SQL exception occurred", ex);
+                            }
+
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        return false;
+                    }
+
+                }
+                else
+                {
+                    return false;
+                }
+
+            }
+            else
+            {
+                return false;
+            }
 
 
+        }
 
 
 
@@ -187,7 +265,7 @@ namespace TEbucksServer.DAO
             Transfer transfer = new Transfer();
             transfer.transferId = Convert.ToInt32(reader["transfer_id"]);
             transfer.transferType = Convert.ToString(reader["transfer_name"]);
-            transfer.transferStatus = Convert.ToInt32(reader["transfer_status"]);
+            transfer.transferStatus = Convert.ToString(reader["status_name"]);
             transfer.userFrom = userDao.GetUserByAccountId(Convert.ToInt32(reader["from_user_id"]));
             transfer.userTo = userDao.GetUserByAccountId(Convert.ToInt32(reader["to_user_id"]));
             transfer.amount = Convert.ToDecimal(reader["amount"]);

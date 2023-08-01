@@ -9,7 +9,7 @@ namespace TEbucksServer.Models
 
         public string transferType { get; set; }
 
-        public int transferStatus { get; set; }
+        public string transferStatus { get; set; }
 
         public User userFrom { get; set; }
 

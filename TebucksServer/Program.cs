@@ -16,5 +16,6 @@ namespace TEBucksServer
                 {
                     webBuilder.UseStartup<Startup>();
                 });
+
     }
 }
