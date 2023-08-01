@@ -1,8 +1,7 @@
 USE [master]
-
-DROP database IF EXISTS [tebucks]
+drop database if exists [tebucks]
 GO
-/****** Object:  Database [tebucks]    Script Date: 7/7/2023 9:46:44 AM ******/
+/****** Object:  Database [tebucks]    Script Date: 7/19/2023 4:27:49 PM ******/
 CREATE DATABASE [tebucks]
  CONTAINMENT = NONE
  ON  PRIMARY 
@@ -82,7 +81,7 @@ ALTER DATABASE [tebucks] SET QUERY_STORE = OFF
 GO
 USE [tebucks]
 GO
-/****** Object:  Table [dbo].[account]    Script Date: 7/7/2023 9:46:44 AM ******/
+/****** Object:  Table [dbo].[account]    Script Date: 7/19/2023 4:27:49 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -97,13 +96,13 @@ CREATE TABLE [dbo].[account](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[status]    Script Date: 7/7/2023 9:46:44 AM ******/
+/****** Object:  Table [dbo].[status]    Script Date: 7/19/2023 4:27:49 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[status](
-	[status_id] [int] NOT NULL,
+	[status_id] [int] IDENTITY(1,1) NOT NULL,
 	[status_name] [nvarchar](50) NOT NULL,
  CONSTRAINT [PK_status] PRIMARY KEY CLUSTERED 
 (
@@ -111,7 +110,7 @@ CREATE TABLE [dbo].[status](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[tebucks_user]    Script Date: 7/7/2023 9:46:44 AM ******/
+/****** Object:  Table [dbo].[tebucks_user]    Script Date: 7/19/2023 4:27:49 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -129,13 +128,13 @@ CREATE TABLE [dbo].[tebucks_user](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[transfer]    Script Date: 7/7/2023 9:46:44 AM ******/
+/****** Object:  Table [dbo].[transfer]    Script Date: 7/19/2023 4:27:49 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[transfer](
-	[transfer_id] [int] NOT NULL,
+	[transfer_id] [int] IDENTITY(1,1) NOT NULL,
 	[to_user_id] [int] NOT NULL,
 	[from_user_id] [int] NOT NULL,
 	[transfer_type] [int] NOT NULL,
@@ -147,13 +146,13 @@ CREATE TABLE [dbo].[transfer](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[transfer_type]    Script Date: 7/7/2023 9:46:44 AM ******/
+/****** Object:  Table [dbo].[transfer_type]    Script Date: 7/19/2023 4:27:49 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[transfer_type](
-	[type_id] [int] NOT NULL,
+	[type_id] [int] IDENTITY(1,1) NOT NULL,
 	[transfer_name] [nvarchar](50) NOT NULL,
  CONSTRAINT [PK_transfer_type] PRIMARY KEY CLUSTERED 
 (
@@ -163,31 +162,55 @@ CREATE TABLE [dbo].[transfer_type](
 GO
 SET IDENTITY_INSERT [dbo].[account] ON 
 GO
-INSERT [dbo].[account] ([accountId], [user_id], [balance]) VALUES (1000, 1009, 1000.0000)
+INSERT [dbo].[account] ([accountId], [user_id], [balance]) VALUES (1000, 1001, 950.0000)
 GO
-INSERT [dbo].[account] ([accountId], [user_id], [balance]) VALUES (1001, 1010, 1000.0000)
+INSERT [dbo].[account] ([accountId], [user_id], [balance]) VALUES (1001, 1002, 1050.0000)
 GO
-INSERT [dbo].[account] ([accountId], [user_id], [balance]) VALUES (1002, 1011, 1000.0000)
+INSERT [dbo].[account] ([accountId], [user_id], [balance]) VALUES (1002, 1003, 1000.0000)
 GO
-INSERT [dbo].[account] ([accountId], [user_id], [balance]) VALUES (1003, 1012, 1000.0000)
+INSERT [dbo].[account] ([accountId], [user_id], [balance]) VALUES (1003, 1004, 1000.0000)
 GO
 SET IDENTITY_INSERT [dbo].[account] OFF
 GO
+SET IDENTITY_INSERT [dbo].[status] ON 
+GO
+INSERT [dbo].[status] ([status_id], [status_name]) VALUES (1, N'Approved')
+GO
+INSERT [dbo].[status] ([status_id], [status_name]) VALUES (2, N'Rejected')
+GO
+INSERT [dbo].[status] ([status_id], [status_name]) VALUES (3, N'Pending')
+GO
+SET IDENTITY_INSERT [dbo].[status] OFF
+GO
 SET IDENTITY_INSERT [dbo].[tebucks_user] ON 
 GO
-INSERT [dbo].[tebucks_user] ([user_id], [firstname], [lastname], [username], [password_hash], [salt]) VALUES (1009, N'Keith', N'Duncan', N'dunkster', N'FQrsexexWHj14vH/HOUx22AHEd0=', N'6yiv2Td7m7Q=')
+INSERT [dbo].[tebucks_user] ([user_id], [firstname], [lastname], [username], [password_hash], [salt]) VALUES (1001, N'Keithj', N'Duncan', N'dunkster', N'vUjf0HnTN+172bGa3zUdPcVcDOU=', N'55LEuPpUf6M=')
 GO
-INSERT [dbo].[tebucks_user] ([user_id], [firstname], [lastname], [username], [password_hash], [salt]) VALUES (1010, N'Dan', N'Swiderski', N'dandee', N'M27ijfsnYN3flE55gTumkESI62s=', N'hKsVkx+OXic=')
+INSERT [dbo].[tebucks_user] ([user_id], [firstname], [lastname], [username], [password_hash], [salt]) VALUES (1002, N'Colten', N'Smith', N'duckster', N'G2YxfL9LB1PxiT1P1OKeVwp76UA=', N'vwshVkJ3CJM=')
 GO
-INSERT [dbo].[tebucks_user] ([user_id], [firstname], [lastname], [username], [password_hash], [salt]) VALUES (1011, N'Colton', N'Smith', N'duckster', N'kyUco0tiOvAV2xOKYPcRCGCNi2k=', N'0mFNO0q9i8Q=')
+INSERT [dbo].[tebucks_user] ([user_id], [firstname], [lastname], [username], [password_hash], [salt]) VALUES (1003, N'Emily', N'Kerick', N'emuly', N'0oYmjskHKOp9neK6QTLobIHbT8M=', N'ZYVjsG5VEFU=')
 GO
-INSERT [dbo].[tebucks_user] ([user_id], [firstname], [lastname], [username], [password_hash], [salt]) VALUES (1012, N'M', N'Kerek', N'Emuly', N'YGsTe90u9H+O440m8Nwgd6UXI4E=', N'RD4J2IfA4HY=')
+INSERT [dbo].[tebucks_user] ([user_id], [firstname], [lastname], [username], [password_hash], [salt]) VALUES (1004, N'Tom', N'Anderson', N'ohcaptain', N'2/eoHwvyi1KlwxHIKxHPczaWykc=', N'U5snswuy6XE=')
 GO
 SET IDENTITY_INSERT [dbo].[tebucks_user] OFF
 GO
+SET IDENTITY_INSERT [dbo].[transfer] ON 
+GO
+INSERT [dbo].[transfer] ([transfer_id], [to_user_id], [from_user_id], [transfer_type], [transfer_status], [amount]) VALUES (1, 1001, 1000, 1, 1, 50.0000)
+GO
+SET IDENTITY_INSERT [dbo].[transfer] OFF
+GO
+SET IDENTITY_INSERT [dbo].[transfer_type] ON 
+GO
+INSERT [dbo].[transfer_type] ([type_id], [transfer_name]) VALUES (1, N'Send')
+GO
+INSERT [dbo].[transfer_type] ([type_id], [transfer_name]) VALUES (2, N'Request')
+GO
+SET IDENTITY_INSERT [dbo].[transfer_type] OFF
+GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [UQ_username]    Script Date: 7/7/2023 9:46:44 AM ******/
+/****** Object:  Index [UQ_username]    Script Date: 7/19/2023 4:27:49 PM ******/
 ALTER TABLE [dbo].[tebucks_user] ADD  CONSTRAINT [UQ_username] UNIQUE NONCLUSTERED 
 (
 	[username] ASC
